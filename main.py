@@ -15,6 +15,9 @@ def train(net, dataloader, optimizer, criterion, epoch):
     for i, data in enumerate(dataloader.trainloader, 0):
         # get the inputs
         inputs, labels = data
+        ########################################### gpu 를 사용하기 위한 코드 #####
+        inputs, labels = inputs.to(torch.device('cuda' if torch.cuda.is_available() else 'cpu')), labels.to(torch.device('cuda' if torch.cuda.is_available() else 'cpu'))
+        #######################################################################
 
         # zero the parameter gradients
         optimizer.zero_grad()
@@ -46,8 +49,11 @@ def test(net, dataloader, tag=''):
         dataTestLoader = dataloader.testloader
     with torch.no_grad():
         for data in dataTestLoader:
-            images, labels = data
-            outputs = net(images)
+            inputs, labels = data
+            ########################################### gpu 를 사용하기 위한 코드 #####
+            inputs, labels = inputs.to(torch.device('cuda' if torch.cuda.is_available() else 'cpu')), labels.to(torch.device('cuda' if torch.cuda.is_available() else 'cpu'))
+            #######################################################################
+            outputs = net(inputs)
             _, predicted = torch.max(outputs.data, 1)
             total += labels.size(0)
             correct += (predicted == labels).sum().item()
@@ -59,8 +65,11 @@ def test(net, dataloader, tag=''):
     class_total = list(0. for i in range(10))
     with torch.no_grad():
         for data in dataTestLoader:
-            images, labels = data
-            outputs = net(images)
+            inputs, labels = data
+            ########################################### gpu 를 사용하기 위한 코드 #####
+            inputs, labels = inputs.to(torch.device('cuda' if torch.cuda.is_available() else 'cpu')), labels.to(torch.device('cuda' if torch.cuda.is_available() else 'cpu'))
+            #######################################################################
+            outputs = net(inputs)
             _, predicted = torch.max(outputs, 1)
             c = (predicted == labels).squeeze()
             for i in range(len(labels)):
@@ -79,6 +88,7 @@ def main():
 
     cifarLoader = CifarLoader(args)
     net = args.model()
+    net.to(torch.device('cuda' if torch.cuda.is_available() else 'cpu')) # model 을 gpu 위에 올리는 건가?
     print('The log is recorded in ')
     print(net.logFile.name)
 
